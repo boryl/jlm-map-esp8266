@@ -1,1 +1,2 @@
-# import compass_node
+import compass_node
+
