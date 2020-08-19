@@ -10,7 +10,7 @@
     </style>
     <script>
         // Create a client instance
-        client = new Paho.MQTT.Client("raspberrypi.local", 9001, "clientId");
+        client = new Paho.MQTT.Client("localhost", 9001, "client1");
 
         // set callback handlers
         client.onConnectionLost = onConnectionLost;
@@ -51,6 +51,8 @@
                 console.log("onConnectionLost:" + responseObject.errorMessage);
                 document.getElementById("device").style.visibility = "hidden";
             }
+            // Reload if mqtt connection is lost?
+            location.reload();
         }
 
         // called when a message arrives
@@ -59,15 +61,25 @@
             console.log("Topic:" + message.destinationName);
             if (message.destinationName == 'map' && message.payloadString == "0") {
                 console.log("Game started, waiting for user to choose map")
+                document.getElementById("text").innerHTML = "Game started, choose map on controller";
+            } else if (message.destinationName == 'map' && message.payloadString == "-1") {
+                document.getElementById("text").innerHTML = "Ipad removed, put in idle mode";
             } else if (message.destinationName == 'map') {
                 console.log("Map chosen on HW-controller")
-                map = parseInt(message.payloadString)
+                chosen_map = parseInt(message.payloadString)
+
+                // Send 0 on status topic to activate hw-controller
                 message = new Paho.MQTT.Message("0");
                 message.destinationName = "status";
                 client.send(message);
-            } else if (message.destinationName == 'direction' && JSON.parse(message.payloadString)[0] == "N") {
-                // Pause interactions
+                document.getElementById("text").innerHTML = "Controller is now active, start journey";
+                document.getElementById("chosen_map").innerHTML = "Map: " + chosen_map;
+            } else if (message.destinationName == 'direction') {
+                // JSON.parse(message.payloadString)
                 console.log("Got direction, pause HW-controller until movement is complete")
+                document.getElementById("directions").innerHTML = "Last directions executed: " + message.payloadString;
+                ["N", "N", "N", "N"]
+                // Send 1 on status topic to pause hw-controller
                 message = new Paho.MQTT.Message("1");
                 message.destinationName = "status";
                 client.send(message);
@@ -78,102 +90,32 @@
                 document.getElementById("ship").style.top = '150px';
 
                 // Reset or resume interactions
-                if (map == 1) {
+                if (chosen_map == 1) {
                     // Reached goal, reset
                     console.log("Reached goal, reset HW-contriller")
+                    document.getElementById("text").innerHTML = "Reached goal, showing symbol";
+                    // Send 2 on status topic to finish (not used in hw)
                     message = new Paho.MQTT.Message("2");
                 } else {
                     // Goal not reached, resume
                     console.log("Goal not reached, resume HW-contriller")
+                    document.getElementById("text").innerHTML = "Didn't reach goal, controller active again";
+                    // Send 0 on status topic to resume hw-controller
                     message = new Paho.MQTT.Message("0");
                 }
                 message.destinationName = "status";
                 client.send(message);
 
 
-            } else if (message.destinationName == 'direction' && JSON.parse(message.payloadString)[0] == "E") {
-                // Pause interactions
-                console.log("got direction")
-                message = new Paho.MQTT.Message("1");
-                message.destinationName = "status";
-                client.send(message);
-
-                // Wait for interaction to finish
-                sleep(5000)
-
-                document.getElementById("ship").style.left = '375px';
-
-                // Reset or resume interactions
-                if (map == 2) {
-                    // Reached goal, reset
-                    message = new Paho.MQTT.Message("2");
-                } else {
-                    // Goal not reached, resume
-                    message = new Paho.MQTT.Message("0");
-                }
-                message.destinationName = "status";
-                client.send(message);
-
-
-
-                
-            } else if (message.destinationName == 'direction' && JSON.parse(message.payloadString)[0] == "S") {
-                // Pause interactions
-                console.log("got direction")
-                message = new Paho.MQTT.Message("1");
-                message.destinationName = "status";
-                client.send(message);
-
-                // Wait for interaction to finish
-                sleep(5000)
-
-                document.getElementById("ship").style.top = '450px';
-
-                // Reset or resume interactions
-                if (map == 3) {
-                    // Reached goal, reset
-                    message = new Paho.MQTT.Message("2");
-                } else {
-                    // Goal not reached, resume
-                    message = new Paho.MQTT.Message("0");
-                }
-                message.destinationName = "status";
-                client.send(message);
-
-
-                
-            } else if (message.destinationName == 'direction' && JSON.parse(message.payloadString)[0] == "W") {
-                // Pause interactions
-                console.log("got direction")
-                message = new Paho.MQTT.Message("1");
-                message.destinationName = "status";
-                client.send(message);
-
-                // Wait for interaction to finish
-                sleep(5000)
-
-                document.getElementById("ship").style.left = '175px';
-
-                // Reset or resume interactions
-                if (map == 4) {
-                    // Reached goal, reset
-                    message = new Paho.MQTT.Message("2");
-                } else {
-                    // Goal not reached, resume
-                    message = new Paho.MQTT.Message("0");
-                }
-                message.destinationName = "status";
-                client.send(message);
-
-
-                
-            }
+            } 
         }
     </script>
 </head>
 
 <body style="background-color:seashell">
-
+    <div id="text">Idling - no iPad conected</div>
+    <div id="directions"></div>
+    <div id="chosen_map"></div>
     <div style="position: relative; width: 450px; height: 350px; background:cornflowerblue; padding: 60px; margin: 10px auto 0; font-size: 40px; font-weight: normal; font-family: 'Comic Sans MS'; text-align: center"
         id="navigation">
         <div id="ship"
