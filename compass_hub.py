@@ -10,10 +10,10 @@ class HardwareInterface:
         self.mqtt_client = None
         self.maps_leds_pulse = None
 
-        self.btn_run = Button(10, bounce_time=0.1, hold_time=3)
-        self.btn_map1 = Button(17, bounce_time=0.1, hold_time=3)
-        self.btn_map2 = Button(27, bounce_time=0.1, hold_time=3)
-        self.btn_map3 = Button(22, bounce_time=0.1, hold_time=3)
+        self.btn_run = Button(10, bounce_time=0.1)
+        self.btn_map1 = Button(17, bounce_time=0.1, hold_time=5)
+        self.btn_map2 = Button(27, bounce_time=0.1, hold_time=5)
+        self.btn_map3 = Button(22, bounce_time=0.1, hold_time=5)
         self.input_ipad = Button(25, bounce_time=2)
         self.output_pause = LED(18)
         self.output_powerswitch = LED(23)
