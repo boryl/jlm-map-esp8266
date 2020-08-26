@@ -184,7 +184,6 @@ async def main():
     while True:
         if (
             hardwareInterface.btn_map1.is_held and
-            hardwareInterface.btn_map2.is_held and
             hardwareInterface.btn_map3.is_held and not
             hardwareInterface.input_ipad.is_active
         ):
