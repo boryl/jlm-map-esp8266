@@ -182,17 +182,17 @@ def on_message(client, userdata, msg):
 # MAIN LOOP
 async def main():
     while True:
-        if (
-            hardwareInterface.btn_map1.is_held and
-            hardwareInterface.btn_map3.is_held and not
-            hardwareInterface.input_ipad.is_active
-        ):
-            if hardwareInterface.btn_run.is_active:
-                # Restart
-                subprocess.Popen(['sudo', 'shutdown', '-r', 'now'])
-            else:
-                # Shutdown
-                subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
+        # if (
+        #     hardwareInterface.btn_map1.is_held and
+        #     hardwareInterface.btn_map3.is_held and not
+        #     hardwareInterface.input_ipad.is_active
+        # ):
+        #     if hardwareInterface.btn_run.is_active:
+        #         # Restart
+        #         subprocess.Popen(['sudo', 'shutdown', '-r', 'now'])
+        #     else:
+        #         # Shutdown
+        #         subprocess.Popen(['sudo', 'shutdown', '-h', 'now'])
 
         if hardwareInterface.input_ipad.is_active:
             # Ipad connected, wake gui and esp
